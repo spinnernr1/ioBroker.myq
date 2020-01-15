@@ -33,6 +33,16 @@ const deviceAttributes = {
 			'9': 'not closed'
 		}
 	},
+	lightstate: {
+		sect: 'states',
+		name: 'Light state',
+		type: 'boolean',
+		role: 'indicator.light',
+		states: {
+			'0': 'off',
+			'1': 'on'
+		}
+	},
 	addedtime: {
 		sect: 'info',
 		name: 'Added at',
@@ -121,13 +131,13 @@ function createOrSetState(id, setobj, setval) {
 
 function setOrUpdateState(id, name, setval, setunit, settype, setrole, setstates) {
         if(!setunit) {
-                setunit = '';
+			setunit = '';
         }
         if(!settype) {
-                settype = 'number';
+			settype = 'number';
         }
         if(!setrole) {
-                setrole = 'value';
+			setrole = 'value';
         }
         
 		let read = true;
@@ -152,8 +162,8 @@ function setOrUpdateState(id, name, setval, setunit, settype, setrole, setstates
                 },
                 native: {}
         };
-		if(setstates && setstates.length > 0) {
-			obj.common['states'] = setstates;
+		if(setstates) {
+			obj['common']['states'] = setstates;
 		}
         createOrSetState(id, obj, setval);
 }
@@ -163,7 +173,7 @@ function setOrUpdateObject(id, name, settype, callback) {
 		settype = 'channel';
 	}
 	
-	let obj = {
+	let setObj = {
 		type: settype,
 		common: {
 			name: name
@@ -173,11 +183,11 @@ function setOrUpdateObject(id, name, settype, callback) {
 	
 	adapter.getObject(id, function(err, obj) {
 		if(!err && obj) {
-			adapter.extendObject(id, obj, function() {
+			adapter.extendObject(id, setObj, function() {
 				return callback && callback();
 			});
 		} else {
-			adapter.setObject(id, obj, function() {
+			adapter.setObject(id, setObj, function() {
 				return callback && callback();
 			});
 		}
@@ -188,7 +198,6 @@ let adapter;
 var deviceUsername;
 var devicePassword;
 
-let bigPolling;
 let polling;
 let pollingTime;
 let controller;
@@ -205,13 +214,8 @@ function startAdapter(options) {
 		if(polling) {
 			clearTimeout(polling);
 		}
-		if(bigPolling) {
-			clearTimeout(bigPolling);
-		}
-		controller.logout(function (err, data) {
-			adapter.setState('info.connection', false, true);
-            callback();
-        });
+		adapter.setState('info.connection', false, true);
+		callback();
 	});
 
 	adapter.on('stateChange', function(id, state) {
@@ -295,8 +299,6 @@ function main() {
 	adapter.log.debug('[START] Started Adapter');
 
 	adapter.subscribeStates('*');
-	
-	setOrUpdateState('update', 'Update device states', false, '', 'boolean', 'button.refresh');
 	
 	controller = new myq.MyQ(deviceUsername, devicePassword, adapter);
 	
@@ -382,12 +384,12 @@ function processDeviceState(device) {
 		
 		let doorState = getMyQDeviceAttribute(device, 'doorstate');
 		if(null !== doorState) {
-			setOrUpdateState(objId + '.states.working', 'Door moving', (doorState == '4' || doorState == '5' || doorState == '8' ? true : false), 'boolean', 'indicator.working');
-			setOrUpdateState(objId + '.commands.open', 'Open door', false, 'boolean', 'button.open');
-			setOrUpdateState(objId + '.commands.close', 'Close door', false, 'boolean', 'button.close');
+			setOrUpdateState(objId + '.states.moving', 'Door moving', (doorState.value == '4' || doorState.value == '5' || doorState.value == '8' ? true : false), '', 'boolean', 'indicator.moving');
+			setOrUpdateState(objId + '.commands.open', 'Open door', false, '', 'boolean', 'button.open');
+			setOrUpdateState(objId + '.commands.close', 'Close door', false, '', 'boolean', 'button.close');
 		} else if(null !== getMyQDeviceAttribute(device, 'lightstate')) {
-			setOrUpdateState(objId + '.commands.on', 'Switch on', false, 'boolean', 'button.on');
-			setOrUpdateState(objId + '.commands.off', 'Switch off', false, 'boolean', 'button.off');
+			setOrUpdateState(objId + '.commands.on', 'Switch on', false, '', 'boolean', 'button.on');
+			setOrUpdateState(objId + '.commands.off', 'Switch off', false, '', 'boolean', 'button.off');
 		}
 		
 		let attr;
@@ -396,19 +398,32 @@ function processDeviceState(device) {
 			attr = deviceAttributes[attrId];
 			attrValue = getMyQDeviceAttribute(device, attrId);
 			if(null !== attrValue) {
-				if(attrValue.toLowerCase() === 'true' || (attr['type'] === 'boolean' && attrValue == '1')) {
-					attrValue = true;
-				} else if(attrValue.toLowerCase() === 'false' || (attr['type'] === 'boolean' && attrValue == '0')) {
-					attrValue = false;
-				} else if(attr['role'] === 'date') {
-					attrValue = (new Date(attrValue)).getTime();
+				let origvalue = attrValue.value;
+				if(attr['type'] === 'number' && attrValue.value.match(/^[1-9][0-9]*(\.[0-9]+)?$/)) {
+					if(attrValue.value.indexOf('.') > -1) {
+						attrValue.value = parseFloat(attrValue.value);
+					} else {
+						attrValue.value = parseInt(attrValue.value, 10);
+					}
+				} else if(attrValue.value.toLowerCase() === 'true' || (attr['type'] === 'boolean' && attrValue.value == '1')) {
+					attrValue.value = true;
+				} else if(attrValue.value.toLowerCase() === 'false' || (attr['type'] === 'boolean' && attrValue.value == '0')) {
+					attrValue.value = false;
+				}
+				
+				if(!attrValue.value && attrValue.value !== 0 && attrValue.value !== false) {
+					adapter.log.warn('Value of ' + attrId + ' is now empty, but was ' + JSON.stringify(origvalue));
+				}
+				
+				if(attr['role'] === 'date') {
+					attrValue.value = (new Date(attrValue.value)).getTime();
 				}
 				
 				if(!attr['states']) {
 					attr['states'] = null;
 				}
 				// attribute exists
-				setOrUpdateState(objId + '.' + attr['sect'] + '.' + attrId, attr['name'], attrValue, attr['type'], attr['role'], attr['states']);
+				setOrUpdateState(objId + '.' + attr['sect'] + '.' + attrId, attr['name'], attrValue.value, '', attr['type'], attr['role'], attr['states']);
 			}
 		}
 	});
@@ -426,7 +441,7 @@ function processStateChange(id, value) {
 	adapter.log.debug('StateChange: ' + JSON.stringify([id, value]));
 	
 	if(id.match(/\.commands\.(open|close)$/)) {
-		let matches = id.match('/^devices\.([^\.]+)\..*\.(open|close)$/');
+		let matches = id.match(/^devices\.([^\.]+)\.commands\.(open|close)$/);
 		if(!matches) {
 			adapter.log.warn('Could not process state id ' + id);
 			return;
@@ -441,12 +456,11 @@ function processStateChange(id, value) {
 		controller.changeDoorState(deviceId, cmd, function(err, obj) {
 			if(err) {
 				adapter.log.warn('Failed ' + cmd + ' door ' + deviceId + ': ' + JSON.stringify(obj));
-				return;
 			}
 			adapter.setState(id, false, true);
 		});
 	} else if(id.match(/\.commands\.(on|off)$/)) {
-		let matches = id.match('/^devices\.([^\.]+)\..*\.(on|off)$/');
+		let matches = id.match(/^devices\.([^\.]+)\.commands\.(on|off)$/);
 		if(!matches) {
 			adapter.log.warn('Could not process state id ' + id);
 			return;
@@ -461,10 +475,11 @@ function processStateChange(id, value) {
 		controller.changeLampState(deviceId, cmd, function(err, obj) {
 			if(err) {
 				adapter.log.warn('Failed switch ' + cmd + ' lamp ' + deviceId + ': ' + JSON.stringify(obj));
-				return;
 			}
 			adapter.setState(id, false, true);
 		});
+	} else {
+		adapter.log.warn('Unknown id for StateChange with ack=false: ' + id);
 	}
 
 	return;
