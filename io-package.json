@@ -29,8 +29,8 @@
 		"platform": "Javascript/Node.js",
 		"main": "main.js",
 		"mode": "daemon",
-		"icon": "myq.png",
-		"extIcon": "https://raw.githubusercontent.com/StrathCole/ioBroker.myq/master/admin/myq.png",
+		"icon": "myq-q.png",
+		"extIcon": "https://raw.githubusercontent.com/StrathCole/ioBroker.myq/master/admin/myq-q.png",
 		"keywords": [
 			"myq",
 			"garage",
