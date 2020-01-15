@@ -1,0 +1,80 @@
+{
+	"common": {
+		"name": "myq",
+		"version": "0.1.0",
+		"news": {
+			"0.1.0": {
+				"en": "Initial version",
+				"de": "Initiale Version",
+				"ru": "Первоначальный вариант",
+				"pt": "Versão inicial",
+				"nl": "Eerste versie",
+				"fr": "Version initiale",
+				"it": "Versione iniziale",
+				"es": "Versión inicial",
+				"pl": "Początkowa wersja",
+				"zh-cn": "初始版本"
+			}
+		},
+		"title": "MyQ",
+		"titleLang": {
+			"en": "MyQ"
+		},
+		"desc": {
+			"en": "Adapter to communicate with MyQ (Chamberlain/Liftmaster)"
+		},
+		"authors": [
+			"Marius Burkard <m.burkard@pixcept.de>"
+		],
+		"platform": "Javascript/Node.js",
+		"main": "main.js",
+		"mode": "daemon",
+		"icon": "myq.png",
+		"extIcon": "https://raw.githubusercontent.com/StrathCole/ioBroker.myq/master/admin/myq.png",
+		"keywords": [
+			"myq",
+			"garage",
+			"door",
+			"chamberlain",
+			"liftmaster"
+		],
+		"readme": "https://github.com/StrathCole/ioBroker.myq/blob/master/README.md",
+		"loglevel": "info",
+		"type": "iot-systems",
+		"license": "MIT",
+		"messagebox": true,
+		"materialize": true,
+		"enabled": false,
+		"compact": true,
+		"dependencies": [
+		]
+	},
+	"native": {
+		"password": "",
+		"pollInterval": 10
+	},
+	"objects": [],
+	"instanceObjects": [
+		{
+			"_id": "info",
+			"type": "channel",
+			"common": {
+				"name": "Adapter-Information"
+			},
+			"native": {}
+		},
+		{
+			"_id": "info.connection",
+			"type": "state",
+			"common": {
+				"role": "indicator.connected",
+				"name": "Whether the adapter is connected to the gateway",
+				"type": "boolean",
+				"read": true,
+				"write": false,
+				"def": false
+			},
+			"native": {}
+		}
+	]
+}
