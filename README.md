@@ -1,5 +1,9 @@
 ![Logo](admin/myq.png)
 
+[![NPM version](https://img.shields.io/npm/v/iobroker.myq.svg)](https://www.npmjs.com/package/iobroker.myq)
+[![Build Status](https://travis-ci.org/StrathCole/ioBroker.myq.svg?branch=master)](https://travis-ci.org/StrathCole/ioBroker.myq)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/StrathCole/iobroker.myq/blob/master/LICENSE)
+
 # ioBroker.myq
 
 
