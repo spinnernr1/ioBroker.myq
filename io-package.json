@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "myq",
-		"version": "0.1.0",
+		"version": "0.1.1",
 		"news": {
+			"0.1.1": {
+				"en": "Code rework and several bugs fixed",
+				"de": "Code-Überarbeitung und mehrere Fehler behoben",
+				"ru": "Переработка кода и исправление нескольких ошибок",
+				"pt": "Retrabalho de código e vários bugs corrigidos",
+				"nl": "Code herwerken en verschillende bugs opgelost",
+				"fr": "Retouches de code et plusieurs bugs corrigés",
+				"it": "Rielaborazione del codice e correzione di diversi bug",
+				"es": "Retrabajo de código y varios errores corregidos",
+				"pl": "Poprawiono kod i naprawiono kilka błędów",
+				"zh-cn": "代码返工和修复的若干错误"
+			},
 			"0.1.0": {
 				"en": "Initial version",
 				"de": "Initiale Version",
@@ -21,7 +33,16 @@
 			"en": "MyQ"
 		},
 		"desc": {
-			"en": "Adapter to communicate with MyQ (Chamberlain/Liftmaster)"
+			"en": "Adapter to communicate with MyQ (Chamberlain/Liftmaster)",
+			"de": "Adapter zur Kommunikation mit MyQ (Chamberlain / Liftmaster)",
+			"ru": "Адаптер для связи с MyQ (Чемберлен / Лифтмастер)",
+			"pt": "Adaptador para se comunicar com MyQ (Chamberlain / Liftmaster)",
+			"nl": "Adapter om te communiceren met MyQ (Chamberlain / Liftmaster)",
+			"fr": "Adaptateur pour communiquer avec MyQ (Chamberlain / Liftmaster)",
+			"it": "Adattatore per comunicare con MyQ (Chamberlain / Liftmaster)",
+			"es": "Adaptador para comunicarse con MyQ (Chamberlain / Liftmaster)",
+			"pl": "Adapter do komunikacji z MyQ (Chamberlain / Liftmaster)",
+			"zh-cn": "与MyQ通信的适配器（Chamberlain / Liftmaster）"
 		},
 		"authors": [
 			"Marius Burkard <m.burkard@pixcept.de>"

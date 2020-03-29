@@ -11,10 +11,47 @@
 
 # ioBroker.myq
 
+An ioBroker adapter for MyQ (Chamberlain/Liftmaster). This project has no affiliation with the mentioned companies.  
+To start using the adapter add an instance and enter your myQ username and password on the config screen.
 
-An ioBroker adapter for MyQ (Chamberlain/Liftmaster). This project has no affiliation with the mentioned companies.
+## States
+
+Not all states are available for all type of devices.
+
+`myq.0.devices.11090132.info.MyQDeviceTypeId` - The type of the device in numeric form  
+`myq.0.devices.11090132.info.MyQDeviceTypeName` - The human-readable type of the device, e.g. Gateway or GarageDoorOpener  
+`myq.0.devices.11090132.info.SerialNumber` - The serial number of the device  
+`myq.0.devices.11090132.info.desc` - The user-provided name of the device  
+`myq.0.devices.11090132.info.fwver` - The current firmware version of the device  
+`myq.0.devices.11090132.info.name` - The internal device name (not the user provided one)  
+`myq.0.devices.11090132.info.numdevices` - (gateway) The number of connected devices for this gateway  
+`myq.0.devices.11090132.info.online` - The device is currently connected to the cloud and is reachable  
+`myq.0.devices.11090132.states.IsFirmwareCurrent` - `true`, if the device firmware is up to date  
+`myq.0.devices.11090132.states.ishomekitactive` - `true`, if Homekit usage is active for this device  
+`myq.0.devices.11090132.states.ishomekitcapable` - `true`, if the device is homekit-capable  
+`myq.0.devices.11090157.states.doorstate` - (garage door) State of the door (see Door states)  
+`myq.0.devices.11090157.states.moving` - `true`, if door is currently moving  
+
+### Door states
+ - 1: door is open
+ - 2: door is closed
+ - 3: door was stopped
+ - 4: door is opening
+ - 5: door is closing
+ - 8: door is moving
+ - 9: door is in undefined state (not closed)
+
+## Commands
+
+`myq.0.devices.11090157.commands.close` - Close door  
+`myq.0.devices.11090157.commands.open` - Open door
+
 
 ## Changelog
+
+### 0.1.1
+
+-  Code rework and several bugs fixed
 
 ### 0.1.0
 
