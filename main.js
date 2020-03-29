@@ -1,6 +1,8 @@
 'use strict';
 
 const utils = require('@iobroker/adapter-core'); // Get common adapter utils
+const ioBLib = require('@strathcole/iob-lib').ioBLib;
+
 const myq = require('./lib/myq');
 
 const adapterName = require('./package.json').name.split('.').pop();
@@ -117,83 +119,6 @@ const deviceAttributes = {
 	}
 };
 
-function createOrSetState(id, setobj, setval) {
-	adapter.getObject(id, function(err, obj) {
-		if(err || !obj) {
-			adapter.setObject(id, setobj, function() {
-				adapter.setState(id, setval, true);
-			});
-		} else {
-			adapter.setState(id, setval, true);
-		}
-	});
-}
-
-function setOrUpdateState(id, name, setval, setunit, settype, setrole, setstates) {
-        if(!setunit) {
-			setunit = '';
-        }
-        if(!settype) {
-			settype = 'number';
-        }
-        if(!setrole) {
-			setrole = 'value';
-        }
-        
-		let read = true;
-		let write = false;
-		if(setrole.substr(0, 6) === 'button') {
-			read = false;
-			write = true;
-		} else if(setrole.substr(0, 5) === 'level' || setrole.substr(0, 6) === 'switch') {
-			read = true;
-			write = true;
-		}
-		
-        let obj = {
-                type: 'state',
-                common: {
-                        name: name,
-                        type: settype,
-                        role: setrole,
-                        read: read,
-                        write: write,
-                        unit: setunit
-                },
-                native: {}
-        };
-		if(setstates) {
-			obj['common']['states'] = setstates;
-		}
-        createOrSetState(id, obj, setval);
-}
-
-function setOrUpdateObject(id, name, settype, callback) {
-	if(!settype) {
-		settype = 'channel';
-	}
-	
-	let setObj = {
-		type: settype,
-		common: {
-			name: name
-		},
-		native: {}
-	};
-	
-	adapter.getObject(id, function(err, obj) {
-		if(!err && obj) {
-			adapter.extendObject(id, setObj, function() {
-				return callback && callback();
-			});
-		} else {
-			adapter.setObject(id, setObj, function() {
-				return callback && callback();
-			});
-		}
-	});
-}
-
 let adapter;
 var deviceUsername;
 var devicePassword;
@@ -209,6 +134,7 @@ function startAdapter(options) {
 	});
 
 	adapter = new utils.Adapter(options);
+	ioBLib.init(adapter);
 
 	adapter.on('unload', function(callback) {
 		if(polling) {
@@ -226,21 +152,19 @@ function startAdapter(options) {
 			if(!id) {
 				return;
 			}
-			
+
 			if(state && id.substr(0, adapter.namespace.length + 1) !== adapter.namespace + '.') {
-				processStateChangeForeign(id, state);
 				return;
 			}
 			id = id.substring(adapter.namespace.length + 1); // remove instance name and id
-			
+
 			if(state && state.ack) {
-				processStateChangeAck(id, state);
 				return;
 			}
-			
+
 			state = state.val;
 			adapter.log.debug("id=" + id);
-			
+
 			if('undefined' !== typeof state && null !== state) {
 				processStateChange(id, state);
 			}
@@ -271,12 +195,12 @@ function startAdapter(options) {
 			adapter.getForeignObject('system.config', (err, obj) => {
 				if (obj && obj.native && obj.native.secret) {
 					//noinspection JSUnresolvedVariable
-					adapter.config.password = decrypt(obj.native.secret, adapter.config.password);
+					adapter.config.password = ioBLib.decrypt(obj.native.secret, adapter.config.password);
 				} else {
 					//noinspection JSUnresolvedVariable
-					adapter.config.password = decrypt('Zgfr56gFe87jJOM', adapter.config.password);
+					adapter.config.password = ioBLib.decrypt('Zgfr56gFe87jJOM', adapter.config.password);
 				}
-				
+
 				main();
 			});
 		}
@@ -290,18 +214,18 @@ function main() {
 	deviceUsername = adapter.config.username;
 	devicePassword = adapter.config.password;
 
-	pollingTime = adapter.config.pollinterval || 100000;
+	pollingTime = adapter.config.pollinterval || 10000;
 	if(pollingTime < 5000) {
 		pollingTime = 5000;
 	}
-	
+
 	adapter.log.info('[INFO] Configured polling interval: ' + pollingTime);
 	adapter.log.debug('[START] Started Adapter');
 
 	adapter.subscribeStates('*');
-	
+
 	controller = new myq.MyQ(deviceUsername, devicePassword, adapter);
-	
+
 	controller.login(function(err, obj) {
 		if(!err) {
 			pollStates();
@@ -315,18 +239,18 @@ function pollStates() {
 		clearTimeout(polling);
 		polling = null;
 	}
-	
-	setOrUpdateObject('devices', 'Devices', 'channel', function() {
+
+	ioBLib.setOrUpdateObject('devices', 'Devices', 'channel', function() {
 		controller.getDevices(function(err, obj) {
 			if(err || !obj.devices) {
 				adapter.log.warn('Failed getting devices: ' + JSON.stringify(obj));
 				return;
 			}
-			
+
 			processDeviceStates(obj.devices);
 		});
 	});
-	
+
 	polling = setTimeout(function() {
 		pollStates();
 	}, pollingTime);
@@ -342,7 +266,7 @@ function getMyQDeviceAttribute(device, key) {
 	if(!device || !device.Attributes || !device.Attributes.length) {
 		return null;
 	}
-	
+
 	let attr;
 	for(let i = 0; i < device.Attributes.length; i++) {
 		attr = device.Attributes[i];
@@ -365,6 +289,9 @@ function processDeviceState(device) {
 		adapter.log.debug(JSON.stringify(device));
 		return;
 	}
+
+	//adapter.log.info(JSON.stringify(device));
+
 	let objId = 'devices.' + device.MyQDeviceId;
 	let objName = getMyQDeviceAttribute(device, 'desc');
 	if(!objName || !objName.value) {
@@ -372,26 +299,26 @@ function processDeviceState(device) {
 			value: objId
 		};
 	}
-	setOrUpdateObject(objId, objName.value, 'device', function() {
+	ioBLib.setOrUpdateObject(objId, objName.value, 'device', function() {
 		// process attributes
 		if(device.RegistrationDateTime) {
-			setOrUpdateState(objId + '.info.RegistrationDateTime', 'RegistrationDateTime', (new Date(device.RegistrationDateTime)).getTime(), '', 'number', 'date');
+			ioBLib.setOrUpdateState(objId + '.info.RegistrationDateTime', 'RegistrationDateTime', (new Date(device.RegistrationDateTime)).getTime(), '', 'number', 'date');
 		}
-		setOrUpdateState(objId + '.info.MyQDeviceTypeId', 'MyQ device type', device.MyQDeviceTypeId, '', 'string', 'text');
-		setOrUpdateState(objId + '.info.MyQDeviceTypeName', 'MyQ device type', device.MyQDeviceTypeName, '', 'string', 'text');
-		setOrUpdateState(objId + '.info.SerialNumber', 'Serial number', device.SerialNumber, '', 'string', 'text');
-		setOrUpdateState(objId + '.info.UpdatedDate', 'Last update time', (new Date(device.UpdatedDate)).getTime(), '', 'number', 'date');
-		
+		ioBLib.setOrUpdateState(objId + '.info.MyQDeviceTypeId', 'MyQ device type', device.MyQDeviceTypeId, '', 'string', 'text');
+		ioBLib.setOrUpdateState(objId + '.info.MyQDeviceTypeName', 'MyQ device type', device.MyQDeviceTypeName, '', 'string', 'text');
+		ioBLib.setOrUpdateState(objId + '.info.SerialNumber', 'Serial number', device.SerialNumber, '', 'string', 'text');
+		ioBLib.setOrUpdateState(objId + '.info.UpdatedDate', 'Last update time', (new Date(device.UpdatedDate)).getTime(), '', 'number', 'date');
+
 		let doorState = getMyQDeviceAttribute(device, 'doorstate');
 		if(null !== doorState) {
-			setOrUpdateState(objId + '.states.moving', 'Door moving', (doorState.value == '4' || doorState.value == '5' || doorState.value == '8' ? true : false), '', 'boolean', 'indicator.moving');
-			setOrUpdateState(objId + '.commands.open', 'Open door', false, '', 'boolean', 'button.open');
-			setOrUpdateState(objId + '.commands.close', 'Close door', false, '', 'boolean', 'button.close');
+			ioBLib.setOrUpdateState(objId + '.states.moving', 'Door moving', (doorState.value == '4' || doorState.value == '5' || doorState.value == '8' ? true : false), '', 'boolean', 'indicator.moving');
+			ioBLib.setOrUpdateState(objId + '.commands.open', 'Open door', false, '', 'boolean', 'button.open');
+			ioBLib.setOrUpdateState(objId + '.commands.close', 'Close door', false, '', 'boolean', 'button.close');
 		} else if(null !== getMyQDeviceAttribute(device, 'lightstate')) {
-			setOrUpdateState(objId + '.commands.on', 'Switch on', false, '', 'boolean', 'button.on');
-			setOrUpdateState(objId + '.commands.off', 'Switch off', false, '', 'boolean', 'button.off');
+			ioBLib.setOrUpdateState(objId + '.commands.on', 'Switch on', false, '', 'boolean', 'button.on');
+			ioBLib.setOrUpdateState(objId + '.commands.off', 'Switch off', false, '', 'boolean', 'button.off');
 		}
-		
+
 		let attr;
 		let attrValue;
 		for(let attrId in deviceAttributes) {
@@ -410,43 +337,35 @@ function processDeviceState(device) {
 				} else if(attrValue.value.toLowerCase() === 'false' || (attr['type'] === 'boolean' && attrValue.value == '0')) {
 					attrValue.value = false;
 				}
-				
+
 				if(!attrValue.value && attrValue.value !== 0 && attrValue.value !== false) {
 					adapter.log.warn('Value of ' + attrId + ' is now empty, but was ' + JSON.stringify(origvalue));
 				}
-				
+
 				if(attr['role'] === 'date') {
 					attrValue.value = (new Date(attrValue.value)).getTime();
 				}
-				
+
 				if(!attr['states']) {
 					attr['states'] = null;
 				}
 				// attribute exists
-				setOrUpdateState(objId + '.' + attr['sect'] + '.' + attrId, attr['name'], attrValue.value, '', attr['type'], attr['role'], attr['states']);
+				ioBLib.setOrUpdateState(objId + '.' + attr['sect'] + '.' + attrId, attr['name'], attrValue.value, '', attr['type'], attr['role'], attr['states']);
 			}
 		}
 	});
 }
 
-function processStateChangeAck(id, state) {
-	// not yet
-}
-
-function processStateChangeForeign(id, state) {
-	// not yet
-}
-
 function processStateChange(id, value) {
 	adapter.log.debug('StateChange: ' + JSON.stringify([id, value]));
-	
+
 	if(id.match(/\.commands\.(open|close)$/)) {
 		let matches = id.match(/^devices\.([^\.]+)\.commands\.(open|close)$/);
 		if(!matches) {
 			adapter.log.warn('Could not process state id ' + id);
 			return;
 		}
-		
+
 		let deviceId = matches[1];
 		let cmd = matches[2];
 		if(!deviceId) {
@@ -465,7 +384,7 @@ function processStateChange(id, value) {
 			adapter.log.warn('Could not process state id ' + id);
 			return;
 		}
-		
+
 		let deviceId = matches[1];
 		let cmd = matches[2];
 		if(!deviceId) {
@@ -484,15 +403,6 @@ function processStateChange(id, value) {
 
 	return;
 }
-
-function decrypt(key, value) {
-	var result = '';
-	for(var i = 0; i < value.length; ++i) {
-			result += String.fromCharCode(key[i % key.length].charCodeAt(0) ^ value.charCodeAt(i));
-	}
-	return result;
-}
-
 
 // If started as allInOne/compact mode => return function to create instance
 if(module && module.parent) {

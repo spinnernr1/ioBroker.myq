@@ -1,5 +1,10 @@
 ![Logo](admin/myq.png)
 
+![Number of Installations](http://iobroker.live/badges/myq-installed.svg) [![Downloads](https://img.shields.io/npm/dm/iobroker.myq.svg)](https://www.npmjs.com/package/iobroker.myq)
+
+[![NPM](https://nodei.co/npm/iobroker.myq.png?downloads=true)](https://nodei.co/npm/iobroker.myq/)
+
+![Stable](http://iobroker.live/badges/myq-stable.svg)
 [![NPM version](https://img.shields.io/npm/v/iobroker.myq.svg)](https://www.npmjs.com/package/iobroker.myq)
 [![Build Status](https://travis-ci.org/StrathCole/ioBroker.myq.svg?branch=master)](https://travis-ci.org/StrathCole/ioBroker.myq)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/StrathCole/iobroker.myq/blob/master/LICENSE)
