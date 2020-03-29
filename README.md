@@ -18,19 +18,19 @@ To start using the adapter add an instance and enter your myQ username and passw
 
 Not all states are available for all type of devices.
 
-`myq.0.devices.11090132.info.MyQDeviceTypeId` - The type of the device in numeric form  
-`myq.0.devices.11090132.info.MyQDeviceTypeName` - The human-readable type of the device, e.g. Gateway or GarageDoorOpener  
-`myq.0.devices.11090132.info.SerialNumber` - The serial number of the device  
-`myq.0.devices.11090132.info.desc` - The user-provided name of the device  
-`myq.0.devices.11090132.info.fwver` - The current firmware version of the device  
-`myq.0.devices.11090132.info.name` - The internal device name (not the user provided one)  
-`myq.0.devices.11090132.info.numdevices` - (gateway) The number of connected devices for this gateway  
-`myq.0.devices.11090132.info.online` - The device is currently connected to the cloud and is reachable  
-`myq.0.devices.11090132.states.IsFirmwareCurrent` - `true`, if the device firmware is up to date  
-`myq.0.devices.11090132.states.ishomekitactive` - `true`, if Homekit usage is active for this device  
-`myq.0.devices.11090132.states.ishomekitcapable` - `true`, if the device is homekit-capable  
-`myq.0.devices.11090157.states.doorstate` - (garage door) State of the door (see Door states)  
-`myq.0.devices.11090157.states.moving` - `true`, if door is currently moving  
+`myq.0.devices.<id>.info.MyQDeviceTypeId` - The type of the device in numeric form  
+`myq.0.devices.<id>.info.MyQDeviceTypeName` - The human-readable type of the device, e.g. Gateway or GarageDoorOpener  
+`myq.0.devices.<id>.info.SerialNumber` - The serial number of the device  
+`myq.0.devices.<id>.info.desc` - The user-provided name of the device  
+`myq.0.devices.<id>.info.fwver` - The current firmware version of the device  
+`myq.0.devices.<id>.info.name` - The internal device name (not the user provided one)  
+`myq.0.devices.<id>.info.numdevices` - (gateway) The number of connected devices for this gateway  
+`myq.0.devices.<id>.info.online` - The device is currently connected to the cloud and is reachable  
+`myq.0.devices.<id>.states.IsFirmwareCurrent` - `true`, if the device firmware is up to date  
+`myq.0.devices.<id>.states.ishomekitactive` - `true`, if Homekit usage is active for this device  
+`myq.0.devices.<id>.states.ishomekitcapable` - `true`, if the device is homekit-capable  
+`myq.0.devices.<id>.states.doorstate` - (garage door) State of the door (see Door states)  
+`myq.0.devices.<id>.states.moving` - `true`, if door is currently moving  
 
 ### Door states
  - 1: door is open
@@ -43,8 +43,8 @@ Not all states are available for all type of devices.
 
 ## Commands
 
-`myq.0.devices.11090157.commands.close` - Close door  
-`myq.0.devices.11090157.commands.open` - Open door
+`myq.0.devices.<id>.commands.close` - Close door  
+`myq.0.devices.<id>.commands.open` - Open door
 
 
 ## Changelog
