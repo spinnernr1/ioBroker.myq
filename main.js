@@ -377,6 +377,7 @@ function processStateChange(id, value) {
 				adapter.log.warn('Failed ' + cmd + ' door ' + deviceId + ': ' + JSON.stringify(obj));
 			}
 			adapter.setState(id, false, true);
+			pollStates();
 		});
 	} else if(id.match(/\.commands\.(on|off)$/)) {
 		let matches = id.match(/^devices\.([^\.]+)\.commands\.(on|off)$/);
@@ -396,6 +397,7 @@ function processStateChange(id, value) {
 				adapter.log.warn('Failed switch ' + cmd + ' lamp ' + deviceId + ': ' + JSON.stringify(obj));
 			}
 			adapter.setState(id, false, true);
+			pollStates();
 		});
 	} else {
 		adapter.log.warn('Unknown id for StateChange with ack=false: ' + id);

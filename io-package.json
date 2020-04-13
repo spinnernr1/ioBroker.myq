@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "myq",
-		"version": "0.1.1",
+		"version": "0.1.2",
 		"news": {
+			"0.1.2": {
+				"en": "Poll states after sending command",
+				"de": "Abfragestatus nach dem Senden des Befehls",
+				"ru": "Опрос состояний после отправки команды",
+				"pt": "Estados de pesquisa após enviar o comando",
+				"nl": "Poll-status na het verzenden van de opdracht",
+				"fr": "Interroger les états après l'envoi de la commande",
+				"it": "Stati del sondaggio dopo l'invio del comando",
+				"es": "Estados de encuesta después de enviar el comando",
+				"pl": "Sonduj stany po wysłaniu polecenia",
+				"zh-cn": "发送命令后的轮询状态"
+			},
 			"0.1.1": {
 				"en": "Code rework and several bugs fixed",
 				"de": "Code-Überarbeitung und mehrere Fehler behoben",
